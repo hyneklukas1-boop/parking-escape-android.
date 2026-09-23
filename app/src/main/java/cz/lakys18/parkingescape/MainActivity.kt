@@ -1,14 +1,14 @@
 package cz.lakys18.parkingescape
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.ComponentActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : Activity() {
 
     private lateinit var webView: WebView
 
@@ -30,17 +30,21 @@ class MainActivity : ComponentActivity() {
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = WebChromeClient()
 
-        webView.loadUrl("file:///android_asset/index.html")
-
         setContentView(webView)
+        webView.loadUrl("file:///android_asset/index.html")
     }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (webView.canGoBack()) {
+        if (::webView.isInitialized && webView.canGoBack()) {
             webView.goBack()
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun onDestroy() {
+        webView.destroy()
+        super.onDestroy()
     }
 }
