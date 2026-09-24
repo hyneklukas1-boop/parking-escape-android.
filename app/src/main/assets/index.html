@@ -189,10 +189,24 @@ $('#board').addEventListener('pointerdown',down);$('#board').addEventListener('p
 $('#continue').onclick=()=>{dailyMode=false;load(Math.min(save.unlocked-1,LEVELS.length-1))};
 $('#levelsBtn').onclick=()=>{dailyMode=false;grid();show('levels')};$('#garageBtn').onclick=garage;$('#dailyBtn').onclick=daily;$('#playDaily').onclick=startDaily;
 $('#settingsBtn').onclick=()=>show('settings');document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>{dailyMode=false;hud();show('home')});$('#back').onclick=()=>{dailyMode=false;hud();show('home')};
-$('#restart').onclick=()=>load(li);$('#undo').onclick=()=>{if(hist.length&&!won){cars=hist.pop();moves=Math.max(0,moves-1);tone();draw()}};$('#hint').onclick=()=>{
+$('#restart').onclick=()=>load(li);$('#undo').onclick=()=>{if(hist.length&&!won){cars=hist.pop();moves=Math.max(0,moves-1);tone();draw()}};
+let pendingRewardHint=false;
+window.onRewardedAdEarned=()=>{pendingRewardHint=false;showHint();};
+window.onRewardedAdUnavailable=()=>{pendingRewardHint=false;$('#msg').textContent='📶 Reklama zatím není připravena. Zkus to za chvíli.';};
+function showHint(){
  let y=cars.find(c=>c.id==='Y'),block=cars.find(c=>c.id!=='Y'&&occupied(Math.max(y.x+y.l,0),y.y,y.id)&&((c.o==='v'&&c.x>=y.x+y.l)||(c.o==='h'&&c.y===y.y&&c.x>=y.x+y.l)));
  $('#msg').textContent=block?'💡 Zkus nejdřív uvolnit auto '+block.id+'.':'💡 Uvolni cestu před žlutým autem.';
  tone();
+}
+$('#hint').onclick=()=>{
+ if(window.AndroidAds&&AndroidAds.showRewardedAd){
+   if(pendingRewardHint)return;
+   pendingRewardHint=true;
+   $('#msg').textContent='🎬 Spouštím reklamu pro odemčení tipu…';
+   AndroidAds.showRewardedAd();
+ }else{
+   showHint();
+ }
 };
 $('#next').onclick=()=>{
  if(dailyMode){dailyMode=false;hud();show('home');return}
