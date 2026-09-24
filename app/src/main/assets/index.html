@@ -28,6 +28,10 @@ button,select{border:1px solid #ffffff28;background:#ffffff12;color:#fff;border-
   50%{transform:scale(1.3)}
   100%{transform:scale(1);opacity:1}
 }
+@keyframes confettiFall{
+  0%{transform:translateY(-30px) rotate(0deg);opacity:1}
+  100%{transform:translateY(500px) rotate(720deg);opacity:0}
+}
 .settings .line{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #ffffff15}.settings select,.settings button{padding:0 12px}
 
 .skinGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
@@ -120,7 +124,20 @@ function down(e){if(won)return;let g=e.target.closest('[data-id]');if(!g)return;
 function moving(e){if(!drag||won)return;e.preventDefault();let c=cars.find(x=>x.id===drag.id),p=point(e),v=c.o==='h'?p.x:p.y,dv=v-drag.last;if(Math.abs(dv)<S*.45)return;let d=dv>0?1:-1;if(step(c,d)){drag.last+=d*S;drag.changed=true;draw(c.id);if(c.id==='Y'&&c.x+c.l>=N){finish()}}else{drag.last=v;tone('bad');buzz();$('#msg').textContent='🚧 Auto je zablokované.'}}
 function up(e){if(!drag)return;let d=drag;drag=null;if(d.changed&&!won){hist.push(d.snapshot);moves++;tone();$('#msg').textContent='✓ Tah dokončen.';}try{if(e&&$('#board').hasPointerCapture(e.pointerId))$('#board').releasePointerCapture(e.pointerId)}catch(_){ }draw()}
 function rating(){let opt=LEVELS[li].optimal;return moves<=opt+1?3:moves<=opt+5?2:1}
-function finish(){if(won)return;if(drag&&drag.changed){hist.push(drag.snapshot);moves++;drag.changed=false}won=true;let st=rating(),old=save.stars[li],reward=old?5:st*10;if(st>old)save.stars[li]=st;if(dailyMode&&save.dailyDone!==dayKey()){let bonus=st===3?50:st===2?35:20;reward+=bonus;save.dailyDone=dayKey();save.dailyBest[dayKey()]=st}save.coins+=reward;save.unlocked=Math.max(save.unlocked,Math.min(150,li+2));persist();tone('win');buzz();$('#moves').textContent=moves;$('#winStars').textContent='★'.repeat(st)+'☆'.repeat(3-st);$('#winMoves').textContent=moves;$('#reward').textContent=reward;setTimeout(()=>show('win'),350)}
+  function confetti(){
+  const win=$('#win');
+  for(let i=0;i<35;i++){
+    const c=document.createElement('span');
+    c.textContent=['🎉','✨','⭐','🪙'][Math.floor(Math.random()*4)];
+    c.style.cssText=`position:absolute;z-index:20;left:${Math.random()*100}%;top:-30px;font-size:${14+Math.random()*18}px;pointer-events:none;animation:confettiFall ${1.5+Math.random()*1.5}s linear forwards`;
+    win.appendChild(c);
+    setTimeout(()=>c.remove(),3200);
+  }
+  }
+function finish(){if(won)return;if(drag&&drag.changed){hist.push(drag.snapshot);moves++;drag.changed=false}won=true;let st=rating(),old=save.stars[li],reward=old?5:st*10;if(st>old)save.stars[li]=st;if(dailyMode&&save.dailyDone!==dayKey()){let bonus=st===3?50:st===2?35:20;reward+=bonus;save.dailyDone=dayKey();save.dailyBest[dayKey()]=st}save.coins+=reward;save.unlocked=Math.max(save.unlocked,Math.min(150,li+2));persist();tone('win');buzz();$('#moves').textContent=moves;$('#winStars').textContent='★'.repeat(st)+'☆'.repeat(3-st);$('#winMoves').textContent=moves;$('#reward').textContent=reward;setTimeout(()=>{
+  show('win');
+  confetti();
+},350)
 
 function dayKey(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dailyIndex(){let d=new Date(),n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);return 19+(n%(LEVELS.length-19))}
