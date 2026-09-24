@@ -210,6 +210,10 @@ $('#hint').onclick=()=>{
 };
 $('#next').onclick=()=>{
  if(dailyMode){dailyMode=false;hud();show('home');return}
+ const completedLevel=li+1;
+ if(completedLevel%3===0 && window.AndroidAds && AndroidAds.showInterstitialAd){
+   AndroidAds.showInterstitialAd();
+ }
  if(li<LEVELS.length-1)load(li+1);else{hud();show('home')}
 };
 $('#soundBtn').onclick=()=>{save.sound=!save.sound;$('#soundBtn').textContent=save.sound?'ZAP':'VYP';persist();if(save.sound)tone()};$('#vibBtn').onclick=()=>{save.vib=!save.vib;$('#vibBtn').textContent=save.vib?'ZAP':'VYP';persist();buzz()};
