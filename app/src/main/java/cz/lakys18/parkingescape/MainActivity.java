@@ -5,15 +5,23 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebChromeClient;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
+    private RewardedAd rewardedAd;
+    private static final String TEST_REWARDED_AD_UNIT = "ca-app-pub-3940256099942544/5224354917";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -22,7 +30,7 @@ public class MainActivity extends Activity {
 
         enableFullscreen();
 
-        MobileAds.initialize(this, initializationStatus -> { });
+        MobileAds.initialize(this, initializationStatus -> loadRewardedAd());
 
         webView = new WebView(this);
 
@@ -33,12 +41,55 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+        webView.addJavascriptInterface(new AdsBridge(), "AndroidAds");
 
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void loadRewardedAd() {
+        RewardedAd.load(this, TEST_REWARDED_AD_UNIT, new AdRequest.Builder().build(),
+                new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(RewardedAd ad) {
+                        rewardedAd = ad;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError error) {
+                        rewardedAd = null;
+                    }
+                });
+    }
+
+    private void showRewardedAd() {
+        runOnUiThread(() -> {
+            if (rewardedAd == null) {
+                loadRewardedAd();
+                webView.evaluateJavascript("window.onRewardedAdUnavailable && window.onRewardedAdUnavailable()", null);
+                return;
+            }
+            RewardedAd ad = rewardedAd;
+            rewardedAd = null;
+            ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loadRewardedAd();
+                }
+            });
+            ad.show(this, rewardItem ->
+                    webView.evaluateJavascript("window.onRewardedAdEarned && window.onRewardedAdEarned()", null));
+        });
+    }
+
+    private class AdsBridge {
+        @JavascriptInterface
+        public void showRewardedAd() {
+            MainActivity.this.showRewardedAd();
+        }
     }
 
     private void enableFullscreen() {
