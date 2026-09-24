@@ -134,7 +134,22 @@ function rating(){let opt=LEVELS[li].optimal;return moves<=opt+1?3:moves<=opt+5?
     setTimeout(()=>c.remove(),3200);
   }
   }
-function finish(){if(won)return;if(drag&&drag.changed){hist.push(drag.snapshot);moves++;drag.changed=false}won=true;let st=rating(),old=save.stars[li],reward=old?5:st*10;if(st>old)save.stars[li]=st;if(dailyMode&&save.dailyDone!==dayKey()){let bonus=st===3?50:st===2?35:20;reward+=bonus;save.dailyDone=dayKey();save.dailyBest[dayKey()]=st}save.coins+=reward;save.unlocked=Math.max(save.unlocked,Math.min(150,li+2));persist();tone('win');buzz();$('#moves').textContent=moves;$('#winStars').textContent='★'.repeat(st)+'☆'.repeat(3-st);$('#winMoves').textContent=moves;$('#reward').textContent=reward;setTimeout(()=>{
+function finish(){if(won)return;if(drag&&drag.changed){hist.push(drag.snapshot);moves++;drag.changed=false}won=true;let st=rating(),old=save.stars[li],reward=old?5:st*10;if(st>old)save.stars[li]=st;if(dailyMode&&save.dailyDone!==dayKey()){let bonus=st===3?50:st===2?35:20;reward+=bonus;save.dailyDone=dayKey();save.dailyBest[dayKey()]=st}save.coins+=reward;save.unlocked=Math.max(save.unlocked,Math.min(150,li+2));persist();tone('win');buzz();$('#moves').textContent=moves;$('#winStars').textContent='☆☆☆';
+for(let i=1;i<=st;i++){
+  setTimeout(()=>{
+  const stars=$('#winStars');
+  stars.textContent='★'.repeat(i)+'☆'.repeat(3-i);
+  stars.style.animation='none';
+  void stars.offsetWidth;
+  stars.style.animation='starPop .35s ease';
+},i*300);
+} $('#winMoves').textContent=moves;$('#reward').textContent='0';
+let shownReward=0;
+const rewardTimer=setInterval(()=>{
+  shownReward++;
+  $('#reward').textContent=shownReward;
+  if(shownReward>=reward)clearInterval(rewardTimer);
+},35); setTimeout(()=>{
   show('win');
   confetti();
 },350)
@@ -142,7 +157,7 @@ function finish(){if(won)return;if(drag&&drag.changed){hist.push(drag.snapshot);
 function dayKey(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dailyIndex(){let d=new Date(),n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);return 19+(n%(LEVELS.length-19))}
 function daily(){
- let k=dayKey(),idx=dailyIndex(),done=save.dailyDone===k;
+ let k=dayKey(),idx=dailyIndex(),done=save.dailyDone===k;-
  $('#dailyInfo').textContent=done?'✅ Dnešní výzvu už máš splněnou. Můžeš ji hrát znovu bez další denní odměny.':`Level ${idx+1} · Jedna výzva na dnešní den`;
  $('#playDaily').textContent=done?'↻ HRÁT ZNOVU':'▶ HRÁT VÝZVU';show('daily')
 }
