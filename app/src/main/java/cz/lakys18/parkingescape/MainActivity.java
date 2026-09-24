@@ -18,12 +18,17 @@ import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.ump.ConsentInformation;
+import com.google.android.ump.ConsentRequestParameters;
+import com.google.android.ump.UserMessagingPlatform;
 
 public class MainActivity extends Activity {
 
     private WebView webView;
     private RewardedAd rewardedAd;
     private InterstitialAd interstitialAd;
+    private ConsentInformation consentInformation;
+    private boolean adsInitialized = false;
     private static final String TEST_REWARDED_AD_UNIT = "ca-app-pub-3940256099942544/5224354917";
     private static final String TEST_INTERSTITIAL_AD_UNIT = "ca-app-pub-3940256099942544/1033173712";
 
@@ -34,10 +39,7 @@ public class MainActivity extends Activity {
 
         enableFullscreen();
 
-        MobileAds.initialize(this, initializationStatus -> {
-            loadRewardedAd();
-            loadInterstitialAd();
-        });
+        requestPrivacyConsent();
 
         webView = new WebView(this);
 
@@ -55,6 +57,32 @@ public class MainActivity extends Activity {
 
         setContentView(webView);
         webView.loadUrl("file:///android_asset/index.html");
+    }
+
+    private void requestPrivacyConsent() {
+        consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        ConsentRequestParameters params = new ConsentRequestParameters.Builder().build();
+
+        consentInformation.requestConsentInfoUpdate(
+                this,
+                params,
+                () -> UserMessagingPlatform.loadAndShowConsentFormIfRequired(
+                        this,
+                        formError -> initializeAdsIfAllowed()),
+                requestConsentError -> initializeAdsIfAllowed());
+
+        initializeAdsIfAllowed();
+    }
+
+    private void initializeAdsIfAllowed() {
+        if (adsInitialized || consentInformation == null || !consentInformation.canRequestAds()) {
+            return;
+        }
+        adsInitialized = true;
+        MobileAds.initialize(this, initializationStatus -> {
+            loadRewardedAd();
+            loadInterstitialAd();
+        });
     }
 
     private void loadRewardedAd() {
