@@ -6,6 +6,8 @@
     <application
         android:theme="@style/Theme.ParkingEscape"
         android:label="Parking Escape"
+        android:icon="@drawable/parking_escape_icon"
+        android:roundIcon="@drawable/parking_escape_icon"
         android:allowBackup="true"
         android:supportsRtl="true">
 
@@ -13,10 +15,12 @@
             android:name=".MainActivity"
             android:screenOrientation="portrait"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
     </application>
