@@ -14,6 +14,8 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.gms.ads.rewarded.RewardedAd;
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
@@ -21,7 +23,9 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private RewardedAd rewardedAd;
+    private InterstitialAd interstitialAd;
     private static final String TEST_REWARDED_AD_UNIT = "ca-app-pub-3940256099942544/5224354917";
+    private static final String TEST_INTERSTITIAL_AD_UNIT = "ca-app-pub-3940256099942544/1033173712";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -30,7 +34,10 @@ public class MainActivity extends Activity {
 
         enableFullscreen();
 
-        MobileAds.initialize(this, initializationStatus -> loadRewardedAd());
+        MobileAds.initialize(this, initializationStatus -> {
+            loadRewardedAd();
+            loadInterstitialAd();
+        });
 
         webView = new WebView(this);
 
@@ -65,6 +72,39 @@ public class MainActivity extends Activity {
                 });
     }
 
+    private void loadInterstitialAd() {
+        InterstitialAd.load(this, TEST_INTERSTITIAL_AD_UNIT, new AdRequest.Builder().build(),
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(InterstitialAd ad) {
+                        interstitialAd = ad;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError error) {
+                        interstitialAd = null;
+                    }
+                });
+    }
+
+    private void showInterstitialAd() {
+        runOnUiThread(() -> {
+            if (interstitialAd == null) {
+                loadInterstitialAd();
+                return;
+            }
+            InterstitialAd ad = interstitialAd;
+            interstitialAd = null;
+            ad.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    loadInterstitialAd();
+                }
+            });
+            ad.show(this);
+        });
+    }
+
     private void showRewardedAd() {
         runOnUiThread(() -> {
             if (rewardedAd == null) {
@@ -89,6 +129,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void showRewardedAd() {
             MainActivity.this.showRewardedAd();
+        }
+
+        @JavascriptInterface
+        public void showInterstitialAd() {
+            MainActivity.this.showInterstitialAd();
         }
     }
 
