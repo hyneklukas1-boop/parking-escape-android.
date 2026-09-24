@@ -9,6 +9,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.google.android.gms.ads.MobileAds;
+
 public class MainActivity extends Activity {
 
     private WebView webView;
@@ -19,6 +21,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         enableFullscreen();
+
+        MobileAds.initialize(this, initializationStatus -> { });
 
         webView = new WebView(this);
 
