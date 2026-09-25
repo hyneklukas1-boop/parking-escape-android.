@@ -26,16 +26,49 @@ jobs:
       - name: Build APK
         run: gradle assembleDebug
 
-      - name: Build AAB
+      - name: Build release AAB
         run: gradle bundleRelease
-      - name: Upload APK
+
+      - name: Create upload keystore
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.PARKING_KEY_PASSWORD }}
+        run: |
+          keytool -genkeypair -v \
+            -keystore "$RUNNER_TEMP/parking-escape-upload.jks" \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            -alias upload \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=Parking Escape, OU=Android, O=Lakys18, L=Pilsen, C=CZ"
+
+      - name: Sign AAB
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.PARKING_KEY_PASSWORD }}
+        run: |
+          jarsigner -verbose \
+            -sigalg SHA256withRSA \
+            -digestalg SHA-256 \
+            -keystore "$RUNNER_TEMP/parking-escape-upload.jks" \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            app/build/outputs/bundle/release/app-release.aab \
+            upload
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: parking-escape-apk
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload AAB
+      - name: Upload Google Play package
         uses: actions/upload-artifact@v4
         with:
-          name: parking-escape-aab
-          path: app/build/outputs/bundle/release/app-release.aab
+          name: Parking-Escape-Google-Play-package
+          path: |
+            app/build/outputs/bundle/release/app-release.aab
+            ${{ runner.temp }}/parking-escape-upload.jks
