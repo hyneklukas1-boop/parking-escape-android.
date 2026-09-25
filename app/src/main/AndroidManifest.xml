@@ -11,10 +11,10 @@
         android:allowBackup="true"
         android:supportsRtl="true">
 
-        <!-- Google test AdMob App ID. Replace with production ID before release. -->
+        <!-- Production AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-4896675580672730~3916246543" />
 
         <activity
             android:name=".MainActivity"
