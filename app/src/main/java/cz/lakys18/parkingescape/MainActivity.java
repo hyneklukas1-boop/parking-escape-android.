@@ -30,7 +30,7 @@ public class MainActivity extends Activity {
     private ConsentInformation consentInformation;
     private boolean adsInitialized = false;
     private static final String REWARDED_AD_UNIT = "ca-app-pub-4896675580672730/2624180321";
-    private static final String TEST_INTERSTITIAL_AD_UNIT = "ca-app-pub-3940256099942544/1033173712";
+    private static final String INTERSTITIAL_AD_UNIT = "ca-app-pub-4896675580672730/5725072104";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
     }
 
     private void loadInterstitialAd() {
-        InterstitialAd.load(this, TEST_INTERSTITIAL_AD_UNIT, new AdRequest.Builder().build(),
+        InterstitialAd.load(this, INTERSTITIAL_AD_UNIT, new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(InterstitialAd ad) {
