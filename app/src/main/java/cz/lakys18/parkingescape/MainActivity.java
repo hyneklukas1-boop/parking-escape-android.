@@ -29,8 +29,20 @@ public class MainActivity extends Activity {
     private InterstitialAd interstitialAd;
     private ConsentInformation consentInformation;
     private boolean adsInitialized = false;
-    private static final String REWARDED_AD_UNIT = "ca-app-pub-4896675580672730/2624180321";
-    private static final String INTERSTITIAL_AD_UNIT = "ca-app-pub-4896675580672730/5725072104";
+    private static final String PROD_REWARDED_AD_UNIT = "ca-app-pub-4896675580672730/2624180321";
+    private static final String PROD_INTERSTITIAL_AD_UNIT = "ca-app-pub-4896675580672730/5725072104";
+    // Official Google test ad units are used in debug builds so development/testing
+    // never generates traffic on the production Parking Escape ad units.
+    private static final String TEST_REWARDED_AD_UNIT = "ca-app-pub-3940256099942544/5224354917";
+    private static final String TEST_INTERSTITIAL_AD_UNIT = "ca-app-pub-3940256099942544/1033173712";
+
+    private String rewardedAdUnit() {
+        return BuildConfig.DEBUG ? TEST_REWARDED_AD_UNIT : PROD_REWARDED_AD_UNIT;
+    }
+
+    private String interstitialAdUnit() {
+        return BuildConfig.DEBUG ? TEST_INTERSTITIAL_AD_UNIT : PROD_INTERSTITIAL_AD_UNIT;
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -86,7 +98,7 @@ public class MainActivity extends Activity {
     }
 
     private void loadRewardedAd() {
-        RewardedAd.load(this, REWARDED_AD_UNIT, new AdRequest.Builder().build(),
+        RewardedAd.load(this, rewardedAdUnit(), new AdRequest.Builder().build(),
                 new RewardedAdLoadCallback() {
                     @Override
                     public void onAdLoaded(RewardedAd ad) {
@@ -101,7 +113,7 @@ public class MainActivity extends Activity {
     }
 
     private void loadInterstitialAd() {
-        InterstitialAd.load(this, INTERSTITIAL_AD_UNIT, new AdRequest.Builder().build(),
+        InterstitialAd.load(this, interstitialAdUnit(), new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
                     public void onAdLoaded(InterstitialAd ad) {
