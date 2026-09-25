@@ -3,6 +3,10 @@ plugins {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
+
     namespace = "cz.lakys18.parkingescape"
     compileSdk = 35
 
