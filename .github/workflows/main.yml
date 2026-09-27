@@ -32,7 +32,7 @@ jobs:
       - name: Create upload keystore
         env:
           KEYSTORE_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.PARKING_KEY_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
         run: |
           keytool -genkeypair -v \
             -keystore "$RUNNER_TEMP/parking-escape-upload.jks" \
@@ -47,7 +47,7 @@ jobs:
       - name: Sign AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.PARKING_KEY_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
         run: |
           jarsigner -verbose \
             -sigalg SHA256withRSA \
