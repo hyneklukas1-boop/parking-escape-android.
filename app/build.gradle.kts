@@ -14,7 +14,7 @@ android {
         applicationId = "cz.lakys18.parkingescape"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "1.0"
     }
 }
