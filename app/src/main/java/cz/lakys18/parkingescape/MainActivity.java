@@ -3,12 +3,18 @@ package cz.lakys18.parkingescape;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.FrameLayout;
 import android.webkit.WebChromeClient;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -49,7 +55,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        enableFullscreen();
+        configureSystemBars();
 
         requestPrivacyConsent();
 
@@ -67,7 +73,23 @@ public class MainActivity extends Activity {
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient());
 
-        setContentView(webView);
+        // Android 15/16 can draw the window underneath system bars. Keep the
+        // WebView itself inside the safe area so CSS coordinates and touches
+        // use the same unobscured viewport, including after rotation.
+        FrameLayout content = new FrameLayout(this);
+        content.setBackgroundColor(0xFF0C1720);
+        content.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
+        ViewCompat.setOnApplyWindowInsetsListener(content, (view, windowInsets) -> {
+            Insets safeArea = windowInsets.getInsetsIgnoringVisibility(
+                    WindowInsetsCompat.Type.systemBars()
+                            | WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(safeArea.left, safeArea.top, safeArea.right, safeArea.bottom);
+            return WindowInsetsCompat.CONSUMED;
+        });
+        setContentView(content);
+        ViewCompat.requestApplyInsets(content);
         webView.loadUrl("file:///android_asset/index.html");
     }
 
@@ -177,29 +199,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void enableFullscreen() {
-        getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        );
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        enableFullscreen();
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) {
-            enableFullscreen();
-        }
+    private void configureSystemBars() {
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(
+                getWindow(), getWindow().getDecorView());
+        controller.show(WindowInsetsCompat.Type.systemBars());
+        controller.setAppearanceLightStatusBars(false);
+        controller.setAppearanceLightNavigationBars(false);
     }
 
     @Override

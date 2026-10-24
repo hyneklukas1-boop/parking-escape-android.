@@ -14,12 +14,13 @@ android {
         applicationId = "cz.lakys18.parkingescape"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.1"
+        versionCode = 4
+        versionName = "1.0.2"
     }
 }
 
 dependencies {
+    implementation("androidx.core:core:1.10.1")
     // Replace the obsolete transitive Fragment 1.1.0 flagged by Play Console.
     implementation("androidx.fragment:fragment:1.8.9")
     implementation("com.google.android.gms:play-services-ads:24.9.0")
