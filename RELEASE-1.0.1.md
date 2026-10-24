@@ -1,6 +1,6 @@
 # Parking Escape 1.0.1 / code 3
 
-Replaces obsolete transitive AndroidX Fragment 1.1.0 with 1.8.9 and updates Google Mobile Ads within the 24.x series, from 24.6.0 to 24.9.0. UMP 4.0.0 remains unchanged. The min SDK stays 24; game assets, native bridge, consent flow, ad IDs, and stored progress format are unchanged.
+Replaces obsolete transitive AndroidX Fragment 1.1.0 with 1.8.9 and updates Google Mobile Ads within the 24.x series, from 24.6.0 to 24.9.0. UMP 4.0.0 remains unchanged. The min SDK stays 24. Native bridge, consent flow, ad IDs, level data and stored progress format are unchanged. Corrects two JavaScript syntax errors in the shipped index.html (a stray minus in daily() and the missing closing brace of finish()) and explicitly initializes dailyMode. Those errors prevented startup; the prior signed AAB contains the same faulty asset.
 
 CI pins Gradle 8.9, verifies Fragment in both runtime graphs, saves the selected release dependency graph, runs Android lint and test tasks, builds APK/AAB, and signs the AAB with the existing upload key. No app unit tests existed at the base revision; a NO-SOURCE test task must not be reported as passing unit tests.
 
