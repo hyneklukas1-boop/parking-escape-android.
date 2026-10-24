@@ -152,12 +152,14 @@ const rewardTimer=setInterval(()=>{
 },35); setTimeout(()=>{
   show('win');
   confetti();
-},350)
+},350);
+}
 
+let dailyMode=false;
 function dayKey(){let d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dailyIndex(){let d=new Date(),n=Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/86400000);return 19+(n%(LEVELS.length-19))}
 function daily(){
- let k=dayKey(),idx=dailyIndex(),done=save.dailyDone===k;-
+ let k=dayKey(),idx=dailyIndex(),done=save.dailyDone===k;
  $('#dailyInfo').textContent=done?'✅ Dnešní výzvu už máš splněnou. Můžeš ji hrát znovu bez další denní odměny.':`Level ${idx+1} · Jedna výzva na dnešní den`;
  $('#playDaily').textContent=done?'↻ HRÁT ZNOVU':'▶ HRÁT VÝZVU';show('daily')
 }
