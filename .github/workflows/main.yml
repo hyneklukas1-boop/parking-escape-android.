@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - codex/parking-sdk-20261024
 
 jobs:
   build:
@@ -22,6 +23,29 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Verify game startup and saved progress
+        run: |
+          npm install --no-save --package-lock=false playwright@1.62.1
+          npx playwright install --with-deps chromium
+          node scripts/verify-game.mjs
+
+      - name: Verify selected dependencies
+        run: |
+          mkdir -p qa
+          gradle verifyFragmentDependency
+          gradle :app:dependencyInsight --configuration releaseRuntimeClasspath --dependency androidx.fragment:fragment > qa/fragment-dependency.txt
+          gradle :app:dependencies --configuration releaseRuntimeClasspath > qa/release-dependencies.txt
+
+      - name: Android checks
+        run: gradle testDebugUnitTest lintRelease
 
       - name: Build APK
         run: gradle assembleDebug
@@ -41,12 +65,12 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.PARKING_KEYSTORE_PASSWORD }}
         run: |
-          jarsigner -verbose \
+          jarsigner \
             -sigalg SHA256withRSA \
             -digestalg SHA-256 \
             -keystore "$RUNNER_TEMP/parking-escape-upload.jks" \
-            -storepass "$KEYSTORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
+            -storepass:env KEYSTORE_PASSWORD \
+            -keypass:env KEY_PASSWORD \
             app/build/outputs/bundle/release/app-release.aab \
             upload
           jarsigner -verify app/build/outputs/bundle/release/app-release.aab
@@ -62,3 +86,12 @@ jobs:
         with:
           name: Parking-Escape-Google-Play-package
           path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Upload verification reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Parking-Escape-1.0.1-verification
+          path: |
+            qa/
+            app/build/reports/
