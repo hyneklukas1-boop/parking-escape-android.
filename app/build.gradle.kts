@@ -30,12 +30,14 @@ dependencies {
 tasks.register("verifyFragmentDependency") {
     doLast {
         listOf("debugRuntimeClasspath", "releaseRuntimeClasspath").forEach { name ->
-            val fragment = configurations.getByName(name).resolvedConfiguration.resolvedArtifacts
-                .single { it.moduleVersion.id.group == "androidx.fragment" && it.name == "fragment" }
-            check(fragment.moduleVersion.id.version == "1.8.9") {
-                "Unexpected Fragment dependency in $name: ${fragment.moduleVersion.id}"
+            val fragment = configurations.getByName(name).incoming.resolutionResult.allComponents
+                .mapNotNull { it.moduleVersion }
+                .filter { it.group == "androidx.fragment" && it.name == "fragment" }
+                .distinct().single()
+            check(fragment.version == "1.8.9") {
+                "Unexpected Fragment dependency in $name: ${fragment}"
             }
-            println("$name: ${fragment.moduleVersion.id}")
+            println("$name: ${fragment}")
         }
     }
 }
